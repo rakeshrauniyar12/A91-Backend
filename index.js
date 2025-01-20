@@ -7,7 +7,7 @@ const propertyRoutes = require("./routes/PropertyRoutes.js");
 const connectDB = require("./config/db");
 const app = express();
 const PORT = 3000;
-// connectDB();
+connectDB();
 // Middleware
 app.use(express.json());
 const corsOptions = {

@@ -1,4 +1,4 @@
-const Property = require("../models/PropertyModel.js");
+const Property = require("../models/Property.js");
 
 // Add Property
 const addProperty = async (req, res) => {
