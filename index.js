@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const userRoutes = require("./routes/UserRoutes.js");
+const otpRoutes = require("./routes/OtpRoutes.js");
 const agentRoutes = require("./routes/AgentRoutes.js");
 const familyMemberRoutes = require("./routes/FamilyMemberRoutes.js");
 const propertyRoutes = require("./routes/PropertyRoutes.js");
@@ -11,7 +12,7 @@ connectDB();
 // Middleware
 app.use(express.json());
 const corsOptions = {
-  origin: ["http://localhost:3000"],
+  origin: ["http://localhost:3000","http://localhost:3001"],
   method: "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD",
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -19,6 +20,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use("/api/auth", userRoutes);
+app.use("/api/auth", otpRoutes);
 app.use("/api/agent", agentRoutes);
 app.use("/api/familymember", familyMemberRoutes);
 app.use("/api/property", propertyRoutes);

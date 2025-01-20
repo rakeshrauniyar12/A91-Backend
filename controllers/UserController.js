@@ -7,7 +7,6 @@ const registerUser = async (req, res) => {
   try {
     const {
       userEmail,
-      userPassword,
       userFirstName,
       userLastName,
       userPhoneNumber,
@@ -19,13 +18,10 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(userPassword,10);
 
     // Create new user
     const newUser = new User({
       userEmail,
-      userPassword: hashedPassword,
       userFirstName,
       userLastName,
       userPhoneNumber,
