@@ -9,7 +9,6 @@ const User = new mongoose.Schema({
   userFirstName: { type: String, default: "" },
   userLastName: { type: String, default: "" },
   userEmail: { type: String, default: "" },
-  userPassword: { type: String, default: "" },
   userPhoneNumber: { type: String, default: "" },
   familyMembers: [
     { type: mongoose.Schema.Types.ObjectId, ref: "FamilyMember" },

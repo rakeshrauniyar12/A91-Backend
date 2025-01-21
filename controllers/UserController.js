@@ -38,21 +38,12 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { userEmail, userPassword } = req.body;
+    const { userEmail } = req.body;
 
     // Check if user exists
     const user = await User.findOne({ userEmail });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
-    }
-
-    // Compare passwords
-    const isPasswordValid = await bcrypt.compare(
-      userPassword,
-      user.userPassword
-    );
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     // Generate JWT

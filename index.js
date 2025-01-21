@@ -7,7 +7,7 @@ const familyMemberRoutes = require("./routes/FamilyMemberRoutes.js");
 const propertyRoutes = require("./routes/PropertyRoutes.js");
 const connectDB = require("./config/db");
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 connectDB();
 // Middleware
 app.use(express.json());
