@@ -12,7 +12,7 @@ connectDB();
 // Middleware
 app.use(express.json());
 const corsOptions = {
-  origin: ["http://localhost:3000","http://localhost:3001"],
+  origin: ["http://localhost:3000","http://localhost:3001","https://a9ine.vercel.app"],
   method: "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD",
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
