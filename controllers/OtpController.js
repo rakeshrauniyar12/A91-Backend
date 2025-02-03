@@ -4,7 +4,6 @@ const axios = require("axios");
 
 exports.sendOtp = async (req, res) => {
   const { email } = req.body;
-  console.log("Email",email)
   const otp = Math.floor(10000 + Math.random() * 90000).toString();
 
   const otpEntry = new Otp({ email, otp });
