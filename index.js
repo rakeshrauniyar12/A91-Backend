@@ -17,7 +17,8 @@ const corsOptions = {
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
 };
-
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cors(corsOptions));
 app.use("/api/auth", userRoutes);
 app.use("/api/auth", otpRoutes);

@@ -1,104 +1,114 @@
-const Property = require("../models/Property.js");
+const Property = require("../models/Property");
+const User = require("../models/User");
 
-// Add Property
-const addProperty = async (req, res) => {
+// Add a new property and link it to the user
+exports.addProperty = async (req, res) => {
   try {
-    const newProperty = new Property(req.body);
-    const savedProperty = await newProperty.save();
-    res.status(201).json({
-      message: "Property added successfully",
-      property: savedProperty,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Error adding property",
-      error: err.message,
-    });
-  }
-};
+    const { userId, ...propertyData } = req.body;
 
-// Get All Properties
-const getProperty = async (req, res) => {
-  try {
-    const properties = await Property.find();
-    res.status(200).json({
-      message: "Properties fetched successfully",
-      properties,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Error fetching properties",
-      error: err.message,
-    });
-  }
-};
-
-// Get Property by ID
-const getPropertyById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const property = await Property.findById(id);
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json({
-      message: "Property fetched successfully",
-      property,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Error fetching property",
-      error: err.message,
-    });
+
+    // Create a new property
+    const newProperty = new Property(propertyData);
+    const savedProperty = await newProperty.save();
+
+    // Add property ID to the user's userProperty array
+    user.userProperty.push(savedProperty._id);
+    await user.save();
+
+    res.status(201).json(savedProperty);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Update Property
-const updateProperty = async (req, res) => {
+// Update a property (only the fields provided in the request body)
+exports.updateProperty = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updatedProperty = await Property.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const { userId, propertyId } = req.params;
+
+    // Ensure property belongs to the user before updating
+    const user = await User.findOne({ _id: userId, userProperty: propertyId });
+    if (!user) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized: Property not linked to this user" });
+    }
+
+    const updatedProperty = await Property.findByIdAndUpdate(
+      propertyId,
+      { $set: req.body },
+      { new: true }
+    );
+
     if (!updatedProperty) {
       return res.status(404).json({ message: "Property not found" });
     }
-    res.status(200).json({
-      message: "Property updated successfully",
-      property: updatedProperty,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Error updating property",
-      error: err.message,
-    });
+
+    res.status(200).json(updatedProperty);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Delete Property
-const deleteProperty = async (req, res) => {
+// Delete a property and remove reference from user's userProperty
+exports.deleteProperty = async (req, res) => {
   try {
-    const { id } = req.params;
-    const deletedProperty = await Property.findByIdAndDelete(id);
+    const { userId, propertyId } = req.params;
+
+    // Ensure property belongs to the user before deleting
+    const user = await User.findOne({ _id: userId, userProperty: propertyId });
+    if (!user) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized: Property not linked to this user" });
+    }
+
+    const deletedProperty = await Property.findByIdAndDelete(propertyId);
     if (!deletedProperty) {
       return res.status(404).json({ message: "Property not found" });
     }
-    res.status(200).json({
-      message: "Property deleted successfully",
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Error deleting property",
-      error: err.message,
-    });
+
+    // Remove property from user's userProperty array
+    user.userProperty = user.userProperty.filter(
+      (id) => id.toString() !== propertyId
+    );
+    await user.save();
+
+    res.status(200).json({ message: "Property deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = {
-  addProperty,
-  getProperty,
-  getPropertyById,
-  updateProperty,
-  deleteProperty,
+// Get all properties of a user based on property type
+exports.getAllPropertyByTypeOfPropertyAndUserId = async (req, res) => {
+  try {
+    const { userId, propertyType } = req.params;
+
+    // Find the user
+    const user = await User.findById(userId).populate({
+      path: "userProperty",
+      match: { propertyType },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Filter only the properties that match the given type
+    const properties = user.userProperty;
+
+    if (!properties.length) {
+      return res.status(404).json({ message: "No properties found" });
+    }
+
+    res.status(200).json(properties);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
